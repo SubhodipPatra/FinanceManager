@@ -6,12 +6,15 @@ import {
 } from 'recharts';
 import { format } from 'date-fns';
 
-// IMPORT THE NEW API HELPER
 import api from '../services/api'; 
 import Navbar from '../components/Navbar';
 import '../styles/Dashboard.css';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+// 1. Expanded Color Palette (Added more colors for more categories)
+const COLORS = [
+  '#0088FE', '#00C49F', '#FFBB28', '#FF8042', 
+  '#A28DFF', '#FF6666', '#82ca9d', '#8dd1e1'
+];
 
 // --- Sub-Components ---
 const IncomeExpenseChart = memo(({ data }) => (
@@ -26,28 +29,42 @@ const IncomeExpenseChart = memo(({ data }) => (
   </ResponsiveContainer>
 ));
 
-const CategoryPieChart = memo(({ data }) => (
-  <ResponsiveContainer width="100%" height={300}>
-    <PieChart>
-      <Pie
-        data={data}
-        cx="50%"
-        cy="50%"
-        innerRadius={60}
-        outerRadius={80}
-        paddingAngle={5}
-        dataKey="total"
-        nameKey="category"
-      >
-        {data.map((entry, index) => (
-          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-        ))}
-      </Pie>
-      <Tooltip />
-      <Legend layout="vertical" verticalAlign="middle" align="right" />
-    </PieChart>
-  </ResponsiveContainer>
-));
+// 2. Fixed Category Pie Chart
+const CategoryPieChart = memo(({ data }) => {
+  // Safe check: If data is empty, don't crash
+  if (!data || data.length === 0) {
+    return <div style={{ textAlign: 'center', padding: '20px' }}>No category data available</div>;
+  }
+
+  return (
+    <ResponsiveContainer width="100%" height={300}>
+      <PieChart>
+        <Pie
+          data={data}
+          cx="50%"
+          cy="50%"
+          innerRadius={60}
+          outerRadius={80}
+          paddingAngle={5}
+          dataKey="total"
+          nameKey="category"
+          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} // Adds labels
+        >
+          {/* This Map function applies the colors */}
+          {data.map((entry, index) => (
+            <Cell 
+              key={`cell-${index}`} 
+              fill={COLORS[index % COLORS.length]} 
+              stroke="none"
+            />
+          ))}
+        </Pie>
+        <Tooltip formatter={(value) => `₹${value}`} />
+        <Legend layout="vertical" verticalAlign="middle" align="right" />
+      </PieChart>
+    </ResponsiveContainer>
+  );
+});
 
 const MonthlyTrendChart = memo(({ data }) => (
   <ResponsiveContainer width="100%" height={300}>
@@ -86,7 +103,6 @@ const Dashboard = () => {
       setLoading(true); 
       setError(null);
       
-      // Use the api helper (no manual URL, no manual token)
       const response = await api.get('/dashboard/analytics');
 
       if (response.data) {
@@ -144,6 +160,7 @@ const Dashboard = () => {
 
             <div className="chart-card">
               <h3 className="chart-title">Spending by Category</h3>
+              {/* Ensure data array is passed safely */}
               <CategoryPieChart data={data.categoryBreakdown || []} />
             </div>
 
