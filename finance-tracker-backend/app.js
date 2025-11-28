@@ -4,11 +4,11 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 
-const sequelize = require('./config/db');
-const authRoutes = require('./routes/authRoutes');
-const transactionRoutes = require('./routes/transactionRoutes');
-const dashboardRoutes = require('./routes/dashboardRoutes');
-const adminRoutes = require('./routes/adminRoutes');
+const sequelize = require('./config/db.js');
+const authRoutes = require('./routes/authRoutes.js');
+const transactionRoutes = require('./routes/transactionRoutes.js');
+const dashboardRoutes = require('./routes/dashboardRoutes.js');
+const adminRoutes = require('./routes/adminRoutes.js');
 
 const app = express();
 
