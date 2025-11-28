@@ -5,12 +5,14 @@ import {
   LineChart, Line, CartesianGrid, ResponsiveContainer 
 } from 'recharts';
 import { format } from 'date-fns';
-import axios from 'axios';
+
+import api from '../services/api'; 
+
 import Navbar from '../components/Navbar';
 import '../styles/Dashboard.css';
 
-const API_BASE_URL = 'http://localhost:4000/api';
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+
 
 const IncomeExpenseChart = memo(({ data }) => (
   <ResponsiveContainer width="100%" height={300}>
@@ -73,6 +75,7 @@ const MonthlyTrendChart = memo(({ data }) => (
   </ResponsiveContainer>
 ));
 
+// --- Main Component ---
 const Dashboard = () => {
   const [data, setData] = useState(null); 
   const [loading, setLoading] = useState(true); 
@@ -81,20 +84,20 @@ const Dashboard = () => {
   const fetchAnalytics = async () => {
     try {
       setLoading(true); 
-      setData(null);    
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error("No authentication token found. Please log in.");
+      setData(null);
+      setError(null);
 
-      const response = await axios.get(`${API_BASE_URL}/dashboard/analytics`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await api.get('/dashboard/analytics');
 
       setData(response.data);
-      setError(null);
     } catch (err) {
-      console.error(err);
-      setData(null);
-      setError(err.response?.data?.message || err.message || "Failed to load analytics data.");
+      console.error("Dashboard Fetch Error:", err);
+
+      if (err.response && err.response.status === 401) {
+        setError("Session expired. Please log in again.");
+      } else {
+        setError(err.response?.data?.message || err.message || "Failed to load analytics data.");
+      }
     } finally {
       setLoading(false);
     }
@@ -104,7 +107,6 @@ const Dashboard = () => {
     fetchAnalytics();
   }, []);
 
- 
   if (loading) return (
     <>
       <Navbar />
@@ -129,22 +131,24 @@ const Dashboard = () => {
         <header className="dashboard-header">
           <h2>Financial Overview</h2>
         </header>
-        <div className="dashboard-grid">
-          <div className="chart-card">
-            <h3 className="chart-title">Income vs Expense</h3>
-            <IncomeExpenseChart data={data.incomeExpense} />
-          </div>
+        {data && (
+          <div className="dashboard-grid">
+            <div className="chart-card">
+              <h3 className="chart-title">Income vs Expense</h3>
+              <IncomeExpenseChart data={data.incomeExpense || []} />
+            </div>
 
-          <div className="chart-card">
-            <h3 className="chart-title">Spending by Category</h3>
-            <CategoryPieChart data={data.categoryBreakdown} />
-          </div>
+            <div className="chart-card">
+              <h3 className="chart-title">Spending by Category</h3>
+              <CategoryPieChart data={data.categoryBreakdown || []} />
+            </div>
 
-          <div className="chart-card full-width">
-            <h3 className="chart-title">Monthly Spending Trend</h3>
-            <MonthlyTrendChart data={data.monthlySpending} />
+            <div className="chart-card full-width">
+              <h3 className="chart-title">Monthly Spending Trend</h3>
+              <MonthlyTrendChart data={data.monthlySpending || []} />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </>
   );
