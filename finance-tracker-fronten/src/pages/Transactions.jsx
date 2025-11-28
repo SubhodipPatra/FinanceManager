@@ -11,19 +11,21 @@ const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-
-
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Check if current user is Admin
+  const isAdmin = user?.role === 'admin';
+  const isReadOnly = user?.role === 'read-only';
 
   const fetchTransactions = async () => {
     try {
+      // The backend automatically determines if it sends ALL data (Admin) 
+      // or just MY data (User) based on the token.
       const { data } = await api.get(`/transactions?page=${page}&limit=10`);
-    
+      
       setTransactions(data.transactions);
       setTotalPages(data.pages);
     } catch (err) {
@@ -35,14 +37,20 @@ const Transactions = () => {
     fetchTransactions();
   }, [page]);
 
-
+  // --- UPDATED: Search now includes User Name (if available) ---
   const filteredTransactions = useMemo(() => {
-    return transactions.filter(t => 
-      t.description.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      t.category.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [transactions, searchTerm]);
+    return transactions.filter(t => {
+      const matchDescription = t.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchCategory = t.category.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      // Admin specific search: Check if the transaction has an associated user name
+      const matchUser = t.User?.name 
+        ? t.User.name.toLowerCase().includes(searchTerm.toLowerCase()) 
+        : false;
 
+      return matchDescription || matchCategory || matchUser;
+    });
+  }, [transactions, searchTerm]);
 
   const handleDelete = useCallback(async (id) => {
     if (!window.confirm("Are you sure?")) return;
@@ -53,7 +61,6 @@ const Transactions = () => {
       alert("Failed to delete transaction");
     }
   }, []);
-
 
   const handleSave = async (formData) => {
     try {
@@ -75,8 +82,6 @@ const Transactions = () => {
     setIsModalOpen(true);
   };
 
-  const isReadOnly = user.role === 'read-only';
-
   return (
     <>
       <Navbar />
@@ -84,7 +89,10 @@ const Transactions = () => {
       <div className="transactions-container">
         
         <div className="page-header">
-          <h2 className="text-2xl font-bold">Transaction History</h2>
+          {/* --- UPDATED: Dynamic Title --- */}
+          <h2 className="text-2xl font-bold">
+            {isAdmin ? 'All User Transactions' : 'My Transaction History'}
+          </h2>
           {!isReadOnly && (
             <button onClick={() => openModal()} className="btn btn-primary">
               + Add Transaction
@@ -93,32 +101,34 @@ const Transactions = () => {
         </div>
 
         <div className="filter-bar">
+          {/* --- UPDATED: Placeholder Text --- */}
           <input 
             type="text" 
-            placeholder="Search description or category..." 
+            placeholder={isAdmin ? "Search description, category, or user..." : "Search description or category..."}
             className="search-input"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
-
         {filteredTransactions.length > 0 ? (
-        
           <div style={{ height: '600px', width: '100%', border: '1px solid #e5e7eb', borderRadius: '8px' }}>
+            
+            {/* --- UPDATED: Passing isAdmin prop --- */}
             <VirtualTransactionList
               transactions={filteredTransactions}
               onEdit={openModal}
               onDelete={handleDelete}
               isReadOnly={isReadOnly}
+              showUserColumn={isAdmin} 
             />
+
           </div>
         ) : (
           <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
             No transactions found.
           </div>
         )}
-
 
         <div className="pagination" style={{ marginTop: '1rem' }}>
           <button 
