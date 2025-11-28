@@ -1,34 +1,63 @@
+// app.js
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 
-const sequelize = require('./config/db.js');
-const authRoutes = require('./routes/authRoutes.js');
-const transactionRoutes = require('./routes/transactionRoutes.js');
-const dashboardRoutes = require('./routes/dashboardRoutes.js');
-const adminRoutes = require('./routes/adminRoutes.js');
+const sequelize = require('./config/db');
+const authRoutes = require('./routes/authRoutes');
+const transactionRoutes = require('./routes/transactionRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
+// ------------------ MIDDLEWARE ------------------ //
+
+// Security headers
 app.use(helmet());
+
+// Enable CORS
 app.use(cors());
+
+// Logger
 app.use(morgan('dev'));
+
+// JSON parser
 app.use(express.json());
 
+// Rate limiting
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, 
-  max: 100, 
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 300, // max requests per IP
   message: 'Too many requests, please try again later.'
 });
 app.use('/api/', apiLimiter);
 
+// ------------------ ROUTES ------------------ //
+
+// Auth routes
 app.use('/api/auth', authRoutes);
+
+// Transaction routes
 app.use('/api/transactions', transactionRoutes);
+
+// Dashboard / analytics routes
+// app.js
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api', dashboardRoutes);
+
+// Admin routes
 app.use('/api/admin', adminRoutes);
 
+// Test route
 app.get('/', (req, res) => res.send('Finance Tracker API Running'));
+
+// ------------------ DATABASE SYNC ------------------ //
+sequelize
+  .sync()
+  .then(() => console.log('Database synced'))
+  .catch(err => console.error('DB sync error:', err));
 
 module.exports = app;

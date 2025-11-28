@@ -50,11 +50,11 @@ const viewTransactions = async (req, res) => {
       limit: parseInt(limit),
       offset: parseInt(offset),
       order: [['createdAt', 'DESC']],
- 
+      // <--- 2. MAGIC HAPPENS HERE: Join with User table
       include: [
         {
           model: User,
-          attributes: ['name', 'email'], 
+          attributes: ['name', 'email'], // Only fetch name/email (exclude password!)
         }
       ]
     });
@@ -71,7 +71,11 @@ const viewTransactions = async (req, res) => {
   }
 };
 
-
+/**
+ * Update Transaction
+ * - Admin can update any transaction
+ * - Users can update their own only
+ */
 const updateTransaction = async (req, res) => {
   try {
     const { id } = req.params;
@@ -93,7 +97,11 @@ const updateTransaction = async (req, res) => {
   }
 };
 
-
+/**
+ * Delete Transaction
+ * - Admin can delete any transaction
+ * - Users can delete their own only
+ */
 const deleteTransaction = async (req, res) => {
   try {
     const { id } = req.params;

@@ -1,24 +1,14 @@
 const { Sequelize } = require('sequelize');
+require('dotenv').config();
 
-const DATABASE_URL =
-  process.env.DATABASE_URL ||
-  'postgres://postgres:password@localhost:5432/finance_db'; // local fallback
-
-const sequelize = new Sequelize(DATABASE_URL, {
+const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
+  host: process.env.DB_HOST,
   dialect: 'postgres',
-  protocol: 'postgres',
-  logging: console.log,
-  dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false,
-    },
-  },
+  logging: false,
 });
 
-sequelize
-  .authenticate()
-  .then(() => console.log('Database connected successfully'))
-  .catch(err => console.error('Unable to connect to the database:', err));
+sequelize.authenticate()
+  .then(() => console.log('Database connected'))
+  .catch(err => console.error('DB connection error:', err));
 
 module.exports = sequelize;

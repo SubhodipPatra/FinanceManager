@@ -2,7 +2,7 @@ const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 
 
-
+// GET all users
 const getAllUsers = async (req, res) => {
   try {
     const users = await User.findAll({
@@ -15,7 +15,7 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-
+// UPDATE user role
 const updateUserRole = async (req, res) => {
   try {
     const { id } = req.params;
@@ -39,17 +39,17 @@ const updateUserRole = async (req, res) => {
   }
 };
 
-
+// DELETE user
 const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
     const user = await User.findByPk(id);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-   
+    // Delete all transactions of the user first
     await Transaction.destroy({ where: { userId: id } });
 
-  
+    // Delete the user
     await user.destroy();
 
     res.json({ message: 'User and all their transactions deleted successfully' });

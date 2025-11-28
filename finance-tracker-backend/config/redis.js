@@ -1,4 +1,4 @@
-
+// config/redis.js
 const redis = require('redis');
 
 const client = redis.createClient({
@@ -7,6 +7,6 @@ const client = redis.createClient({
 
 client.on('error', (err) => console.log('Redis Client Error', err));
 
-client.connect(); 
+client.connect(); // Important for redis v4+
 
 module.exports = client;
