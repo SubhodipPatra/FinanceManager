@@ -1,7 +1,6 @@
 const { Sequelize } = require('sequelize');
-require('dotenv').config();
 
-// Use connection string from environment variable
+// Use DATABASE_URL from env (Vercel injects it automatically)
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: 'postgres',
   protocol: 'postgres',
@@ -14,7 +13,7 @@ const sequelize = new Sequelize(process.env.DATABASE_URL, {
 });
 
 sequelize.authenticate()
-  .then(() => console.log('Database connected'))
+  .then(() => console.log('Neon DB connected'))
   .catch(err => console.error('DB connection error:', err));
 
 module.exports = sequelize;
