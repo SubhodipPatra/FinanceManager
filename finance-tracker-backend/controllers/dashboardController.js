@@ -1,34 +1,35 @@
 const { fn, col } = require('sequelize');
 const Transaction = require('../models/Transaction');
 
-exports.getDashboardAnalytics = async (req, res) => {
+const dashboardAnalytics = async (req, res) => {
   try {
     const userId = req.user.id;
- 
+
     const monthlySpending = await Transaction.findAll({
       where: { userId, type: 'expense' },
       attributes: [
-        [fn('DATE_TRUNC', 'month', col('createdAt')), 'month'],
+        [fn('DATE_TRUNC', 'month', col('date')), 'month'],
         [fn('SUM', col('amount')), 'total']
       ],
-      group: [fn('DATE_TRUNC', 'month', col('createdAt'))], // Grouping by the expression is safer in Postgres
-      order: [[fn('DATE_TRUNC', 'month', col('createdAt')), 'ASC']]
+      group: [fn('DATE_TRUNC', 'month', col('date'))],
+      order: [[fn('DATE_TRUNC', 'month', col('date')), 'ASC']]
     });
 
-    // 2. Category Breakdown
+
     const categoryBreakdown = await Transaction.findAll({
       where: { userId, type: 'expense' },
       attributes: ['category', [fn('SUM', col('amount')), 'total']],
       group: ['category']
     });
 
-    // 3. Income vs Expense
+
     const incomeExpense = await Transaction.findAll({
       where: { userId },
       attributes: ['type', [fn('SUM', col('amount')), 'total']],
       group: ['type']
     });
 
+    // 4. Format Data (Handle empty/null values safely)
     const result = {
       monthlySpending: monthlySpending.map(i => ({
         month: i.dataValues.month,
@@ -51,3 +52,5 @@ exports.getDashboardAnalytics = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch analytics' });
   }
 };
+
+module.exports = { dashboardAnalytics };

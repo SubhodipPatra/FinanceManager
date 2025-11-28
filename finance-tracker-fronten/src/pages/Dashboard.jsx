@@ -6,14 +6,14 @@ import {
 } from 'recharts';
 import { format } from 'date-fns';
 
+// IMPORT THE NEW API HELPER
 import api from '../services/api'; 
-
 import Navbar from '../components/Navbar';
 import '../styles/Dashboard.css';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
-
+// --- Sub-Components ---
 const IncomeExpenseChart = memo(({ data }) => (
   <ResponsiveContainer width="100%" height={300}>
     <BarChart data={data}>
@@ -75,7 +75,7 @@ const MonthlyTrendChart = memo(({ data }) => (
   </ResponsiveContainer>
 ));
 
-// --- Main Component ---
+// --- Main Dashboard Component ---
 const Dashboard = () => {
   const [data, setData] = useState(null); 
   const [loading, setLoading] = useState(true); 
@@ -84,19 +84,23 @@ const Dashboard = () => {
   const fetchAnalytics = async () => {
     try {
       setLoading(true); 
-      setData(null);
       setError(null);
-
+      
+      // Use the api helper (no manual URL, no manual token)
       const response = await api.get('/dashboard/analytics');
 
-      setData(response.data);
-    } catch (err) {
-      console.error("Dashboard Fetch Error:", err);
-
-      if (err.response && err.response.status === 401) {
-        setError("Session expired. Please log in again.");
+      if (response.data) {
+        setData(response.data);
       } else {
-        setError(err.response?.data?.message || err.message || "Failed to load analytics data.");
+        throw new Error("No data received");
+      }
+      
+    } catch (err) {
+      console.error("Dashboard fetch error:", err);
+      if (err.response && err.response.status === 401) {
+        setError("Session expired. Please login again.");
+      } else {
+        setError(err.response?.data?.message || err.message || "Failed to load data");
       }
     } finally {
       setLoading(false);
@@ -110,7 +114,7 @@ const Dashboard = () => {
   if (loading) return (
     <>
       <Navbar />
-      <div className="loading-container">Loading analytics data...</div>
+      <div className="loading-container">Loading analytics...</div>
     </>
   );
 
