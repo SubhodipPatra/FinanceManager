@@ -1,7 +1,7 @@
 
 const { fn, col } = require('sequelize');
 const Transaction = require('../models/Transaction');
-const redisClient = require('../config/redis');
+
 
 
 const dashboardAnalytics = async (req, res) => {
@@ -58,8 +58,8 @@ const dashboardAnalytics = async (req, res) => {
     };
 
 
-    redisClient.setEx(cacheKey, 600, JSON.stringify(result))
-      .catch(err => console.warn('Redis cache error:', err.message));
+    // redisClient.setEx(cacheKey, 600, JSON.stringify(result))
+    //   .catch(err => console.warn('Redis cache error:', err.message));
 
 
     res.json(result);
