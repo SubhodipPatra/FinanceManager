@@ -19,7 +19,13 @@ const app = express();
 app.use(helmet());
 
 // Enable CORS
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:5173",                     // Keep for local testing
+    "https://finance-manager-qudh.vercel.app"           // <-- PASTE YOUR VERCEL URL HERE
+  ],
+  credentials: true
+}));
 
 // Logger
 app.use(morgan('dev'));
