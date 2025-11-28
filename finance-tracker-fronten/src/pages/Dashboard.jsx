@@ -10,13 +10,13 @@ import api from '../services/api';
 import Navbar from '../components/Navbar';
 import '../styles/Dashboard.css';
 
-// 1. Expanded Color Palette (Added more colors for more categories)
+
 const COLORS = [
   '#0088FE', '#00C49F', '#FFBB28', '#FF8042', 
   '#A28DFF', '#FF6666', '#82ca9d', '#8dd1e1'
 ];
 
-// --- Sub-Components ---
+
 const IncomeExpenseChart = memo(({ data }) => (
   <ResponsiveContainer width="100%" height={300}>
     <BarChart data={data}>
@@ -29,9 +29,9 @@ const IncomeExpenseChart = memo(({ data }) => (
   </ResponsiveContainer>
 ));
 
-// 2. Fixed Category Pie Chart
+
 const CategoryPieChart = memo(({ data }) => {
-  // Safe check: If data is empty, don't crash
+
   if (!data || data.length === 0) {
     return <div style={{ textAlign: 'center', padding: '20px' }}>No category data available</div>;
   }
@@ -48,9 +48,9 @@ const CategoryPieChart = memo(({ data }) => {
           paddingAngle={5}
           dataKey="total"
           nameKey="category"
-          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} // Adds labels
+          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} 
         >
-          {/* This Map function applies the colors */}
+
           {data.map((entry, index) => (
             <Cell 
               key={`cell-${index}`} 
@@ -92,7 +92,7 @@ const MonthlyTrendChart = memo(({ data }) => (
   </ResponsiveContainer>
 ));
 
-// --- Main Dashboard Component ---
+
 const Dashboard = () => {
   const [data, setData] = useState(null); 
   const [loading, setLoading] = useState(true); 
@@ -160,7 +160,7 @@ const Dashboard = () => {
 
             <div className="chart-card">
               <h3 className="chart-title">Spending by Category</h3>
-              {/* Ensure data array is passed safely */}
+           
               <CategoryPieChart data={data.categoryBreakdown || []} />
             </div>
 

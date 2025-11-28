@@ -1,4 +1,4 @@
-// app.js
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -13,37 +13,34 @@ const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
-// ------------------ MIDDLEWARE ------------------ //
 
-// Security headers
+
+
 app.use(helmet());
 
-// Enable CORS
 app.use(cors({
   origin: [
-    "http://localhost:5173",                     // Keep for local testing
-    "https://finance-manager-qudh.vercel.app"           // <-- PASTE YOUR VERCEL URL HERE
+    "http://localhost:5173",                    
+    "https://finance-manager-qudh.vercel.app"          
   ],
   credentials: true
 }));
 
-// Logger
+
 app.use(morgan('dev'));
 
-// JSON parser
+
 app.use(express.json());
 
-// Rate limiting
+
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // max requests per IP
+  windowMs: 15 * 60 * 1000, 
+  max: 100, 
   message: 'Too many requests, please try again later.'
 });
 app.use('/api/', apiLimiter);
 
-// ------------------ ROUTES ------------------ //
 
-// Auth routes
 app.use('/api/auth', authRoutes);
 
 

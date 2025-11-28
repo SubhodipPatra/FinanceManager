@@ -4,19 +4,19 @@ require('dotenv').config();
 let sequelize;
 
 if (process.env.DATABASE_URL) {
-  // CONFIGURATION 1: Cloud / Production (Render)
+ 
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',
     logging: false,
     dialectOptions: {
       ssl: {
         require: true, 
-        rejectUnauthorized: false // Crucial for Render's free tier
+        rejectUnauthorized: false 
       }
     }
   });
 } else {
-  // CONFIGURATION 2: Localhost (Your current setup)
+  
   sequelize = new Sequelize(
     process.env.DB_NAME,
     process.env.DB_USER,

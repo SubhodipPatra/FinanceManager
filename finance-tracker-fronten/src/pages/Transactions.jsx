@@ -7,7 +7,7 @@ import VirtualTransactionList from '../components/VirtualTransactionList';
 import '../styles/Transactions.css';
 
 const Transactions = () => {
-  const { user, loading } = useAuth(); // Get user and loading state
+  const { user, loading } = useAuth();
   
   const [transactions, setTransactions] = useState([]);
   const [page, setPage] = useState(1);
@@ -16,13 +16,13 @@ const Transactions = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Role Checks
+
   const isAdmin = user?.role === 'admin';
   const isReadOnly = user?.role === 'read-only';
 
-  // --- 1. Fetch Logic ---
+
   const fetchTransactions = useCallback(async () => {
-    // Safety: Don't fetch if user isn't loaded yet
+
     if (!user) return;
 
     try {
@@ -34,20 +34,18 @@ const Transactions = () => {
     }
   }, [page, user]);
 
-  // --- 2. Initial Load Effect ---
-  // This runs whenever 'page' changes or 'user' becomes available
+
   useEffect(() => {
     fetchTransactions();
   }, [fetchTransactions]); 
 
 
-  // --- 3. Filter Logic ---
+
   const filteredTransactions = useMemo(() => {
     return transactions.filter(t => {
       const matchDescription = t.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchCategory = t.category.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      // Admin: Search by User Name as well
+ 
       const matchUser = t.User?.name 
         ? t.User.name.toLowerCase().includes(searchTerm.toLowerCase()) 
         : false;
@@ -57,7 +55,7 @@ const Transactions = () => {
   }, [transactions, searchTerm]);
 
 
-  // --- 4. Delete Handler ---
+
   const handleDelete = useCallback(async (id) => {
     if (!window.confirm("Are you sure?")) return;
     try {
@@ -69,28 +67,27 @@ const Transactions = () => {
   }, []);
 
 
-  // --- 5. Save/Add Handler (CRITICAL FIXES HERE) ---
+
   const handleSave = async (formData) => {
     try {
-      // FIX A: Convert string "100" to number 100.00
+
       const payload = {
         ...formData,
         amount: parseFloat(formData.amount)
       };
 
       if (editingItem) {
-        // Update existing item
+
         await api.put(`/transactions/${editingItem.id}`, payload);
-        fetchTransactions(); // Refresh current page
+        fetchTransactions(); 
       } else {
-        // Create new item
+   
         await api.post('/transactions', payload);
         
-        // FIX B: If adding new, jump to Page 1 to see the new item
         if (page !== 1) {
-          setPage(1); // This triggers useEffect -> fetchTransactions
+          setPage(1); 
         } else {
-          fetchTransactions(); // We are already on page 1, so force refresh
+          fetchTransactions(); 
         }
       }
 
@@ -107,8 +104,7 @@ const Transactions = () => {
     setIsModalOpen(true);
   };
 
-  // --- 6. Loading Screen ---
-  // Prevent the app from crashing while waiting for 'user' data
+
   if (loading) {
     return (
       <>
