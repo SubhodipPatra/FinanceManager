@@ -1,19 +1,21 @@
+// config/db.js
 const { Sequelize } = require('sequelize');
 
-// Use DATABASE_URL from env (Vercel injects it automatically)
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: 'postgres',
   protocol: 'postgres',
-  logging: false,
+  logging: console.log, // optional, remove in production
   dialectOptions: {
     ssl: {
       require: true,
+      rejectUnauthorized: false, // important for Neon on Vercel
     },
   },
 });
 
-sequelize.authenticate()
-  .then(() => console.log('Neon DB connected'))
-  .catch(err => console.error('DB connection error:', err));
+sequelize
+  .authenticate()
+  .then(() => console.log('Database connected successfully'))
+  .catch(err => console.error('Unable to connect to the database:', err));
 
 module.exports = sequelize;
