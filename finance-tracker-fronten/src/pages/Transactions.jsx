@@ -7,51 +7,51 @@ import VirtualTransactionList from '../components/VirtualTransactionList';
 import '../styles/Transactions.css';
 
 const Transactions = () => {
-  const { user } = useAuth();
+  // 1. Get the 'loading' state from your AuthContext (if you have it)
+  // If your AuthContext doesn't expose 'loading', the logic below still helps.
+  const { user, loading } = useAuth(); 
+  
   const [transactions, setTransactions] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Check if current user is Admin
   const isAdmin = user?.role === 'admin';
   const isReadOnly = user?.role === 'read-only';
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
+    // 2. Safety Check: Do not fetch if no user is logged in yet
+    if (!user) return;
+
     try {
-      // The backend automatically determines if it sends ALL data (Admin) 
-      // or just MY data (User) based on the token.
       const { data } = await api.get(`/transactions?page=${page}&limit=10`);
-      
       setTransactions(data.transactions);
       setTotalPages(data.pages);
     } catch (err) {
       console.error('Failed to fetch transactions', err);
     }
-  };
+  }, [page, user]); // Added 'user' to dependencies
 
+  // 3. Update useEffect to run when 'user' becomes available
   useEffect(() => {
     fetchTransactions();
-  }, [page]);
+  }, [fetchTransactions]); 
 
-  // --- UPDATED: Search now includes User Name (if available) ---
+  // --- Search Logic ---
   const filteredTransactions = useMemo(() => {
     return transactions.filter(t => {
       const matchDescription = t.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchCategory = t.category.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      // Admin specific search: Check if the transaction has an associated user name
       const matchUser = t.User?.name 
         ? t.User.name.toLowerCase().includes(searchTerm.toLowerCase()) 
         : false;
-
       return matchDescription || matchCategory || matchUser;
     });
   }, [transactions, searchTerm]);
 
+  // --- Handlers ---
   const handleDelete = useCallback(async (id) => {
     if (!window.confirm("Are you sure?")) return;
     try {
@@ -82,14 +82,17 @@ const Transactions = () => {
     setIsModalOpen(true);
   };
 
+  // 4. Show a Loading Spinner if Auth is still initializing
+  // (Prevents the page from trying to render "My Transactions" before it knows you are Admin)
+  if (loading) {
+    return <div className="loading-container">Loading User Profile...</div>;
+  }
+
   return (
     <>
       <Navbar />
-      
       <div className="transactions-container">
-        
         <div className="page-header">
-          {/* --- UPDATED: Dynamic Title --- */}
           <h2 className="text-2xl font-bold">
             {isAdmin ? 'All User Transactions' : 'My Transaction History'}
           </h2>
@@ -101,7 +104,6 @@ const Transactions = () => {
         </div>
 
         <div className="filter-bar">
-          {/* --- UPDATED: Placeholder Text --- */}
           <input 
             type="text" 
             placeholder={isAdmin ? "Search description, category, or user..." : "Search description or category..."}
@@ -113,8 +115,6 @@ const Transactions = () => {
 
         {filteredTransactions.length > 0 ? (
           <div style={{ height: '600px', width: '100%', border: '1px solid #e5e7eb', borderRadius: '8px' }}>
-            
-            {/* --- UPDATED: Passing isAdmin prop --- */}
             <VirtualTransactionList
               transactions={filteredTransactions}
               onEdit={openModal}
@@ -122,7 +122,6 @@ const Transactions = () => {
               isReadOnly={isReadOnly}
               showUserColumn={isAdmin} 
             />
-
           </div>
         ) : (
           <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
