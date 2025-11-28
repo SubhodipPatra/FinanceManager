@@ -1,26 +1,26 @@
 import axios from 'axios';
 
-// LOGIC: If Vercel provides a URL, use it. Otherwise, use Localhost.
-const API_URL = import.meta.env.VITE_API_URL 
-  ? `${import.meta.env.VITE_API_URL}/api`
-  : 'http://localhost:4000/api';
-
-console.log("Connecting to API at:", API_URL); // Debugging log
-
+// Create the axios instance
 const api = axios.create({
-  baseURL: API_URL,
-  withCredentials: true // Important for secure cookies if used
+  // ✅ This connects your Vercel Frontend to your Render Backend
+  baseURL: 'https://financemanager-api.onrender.com/api', 
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
-// Interceptor: Automatically attach the token to every request
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+// Interceptor to add the token to every request automatically
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  return config;
-}, (error) => {
-  return Promise.reject(error);
-});
+);
 
 export default api;
