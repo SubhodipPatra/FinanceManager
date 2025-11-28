@@ -46,12 +46,3 @@ A robust, full-stack financial tracking application designed to help users manag
 - **Authentication:** jsonwebtoken (JWT)
 - **Deployment:** Render
 
-## Installation & Setup
-
-Follow these steps to run the project locally.
-
-### 1. Clone the Repository
-
-```bash
-git clone [https://github.com/your-username/finance-manager.git](https://github.com/your-username/finance-manager.git)
-cd finance-manager
