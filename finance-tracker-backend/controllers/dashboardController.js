@@ -1,18 +1,20 @@
-const { fn, col } = require('sequelize');
+const { fn, col, literal } = require('sequelize');
 const Transaction = require('../models/Transaction');
 
 const dashboardAnalytics = async (req, res) => {
   try {
     const userId = req.user.id;
 
+    // --- FIX IS HERE ---
+    // Changed col('date') to col('createdAt') in attributes, group, and order
     const monthlySpending = await Transaction.findAll({
       where: { userId, type: 'expense' },
       attributes: [
-        [fn('DATE_TRUNC', 'month', col('date')), 'month'],
+        [fn('DATE_TRUNC', 'month', col('createdAt')), 'month'],
         [fn('SUM', col('amount')), 'total']
       ],
-      group: [fn('DATE_TRUNC', 'month', col('date'))],
-      order: [[fn('DATE_TRUNC', 'month', col('date')), 'ASC']]
+      group: [fn('DATE_TRUNC', 'month', col('createdAt'))],
+      order: [[fn('DATE_TRUNC', 'month', col('createdAt')), 'ASC']]
     });
 
 
@@ -29,7 +31,7 @@ const dashboardAnalytics = async (req, res) => {
       group: ['type']
     });
 
-    // 4. Format Data (Handle empty/null values safely)
+    // 4. Format Data
     const result = {
       monthlySpending: monthlySpending.map(i => ({
         month: i.dataValues.month,
