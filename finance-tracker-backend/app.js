@@ -1,4 +1,3 @@
-// app.js
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -13,17 +12,10 @@ const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
-
 app.use(helmet());
-
 app.use(cors());
-
-
 app.use(morgan('dev'));
-
-
 app.use(express.json());
-
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, 
@@ -32,26 +24,11 @@ const apiLimiter = rateLimit({
 });
 app.use('/api/', apiLimiter);
 
-
-
 app.use('/api/auth', authRoutes);
-
-
 app.use('/api/transactions', transactionRoutes);
-
-
 app.use('/api/dashboard', dashboardRoutes);
-app.use('/api', dashboardRoutes);
-
-
 app.use('/api/admin', adminRoutes);
 
-
 app.get('/', (req, res) => res.send('Finance Tracker API Running'));
-
-sequelize
-  .sync()
-  .then(() => console.log('Database synced'))
-  .catch(err => console.error('DB sync error:', err));
 
 module.exports = app;
