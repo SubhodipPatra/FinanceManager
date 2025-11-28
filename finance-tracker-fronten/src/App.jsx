@@ -23,14 +23,14 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <ThemeProvider>
-
+       
           <Suspense fallback={<Loader />}>
             <Routes>
-
+   
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               
-  
+
               <Route element={<ProtectedRoute />}>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/transactions" element={<Transactions />} />
@@ -42,6 +42,7 @@ function App() {
                   </AdminRoute>
                 } />
               </Route>
+              
 
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

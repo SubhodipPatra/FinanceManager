@@ -80,7 +80,7 @@ const Dashboard = () => {
 
   const fetchAnalytics = async () => {
     try {
-      setLoading(true);  
+      setLoading(true); 
       setData(null);    
       const token = localStorage.getItem('token');
       if (!token) throw new Error("No authentication token found. Please log in.");
@@ -104,6 +104,7 @@ const Dashboard = () => {
     fetchAnalytics();
   }, []);
 
+ 
   if (loading) return (
     <>
       <Navbar />

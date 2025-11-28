@@ -40,21 +40,20 @@ app.use('/api/', apiLimiter);
 // Auth routes
 app.use('/api/auth', authRoutes);
 
-// Transaction routes
+
 app.use('/api/transactions', transactionRoutes);
 
-// Dashboard / analytics routes
-// app.js
+
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api', dashboardRoutes);
 
-// Admin routes
+
 app.use('/api/admin', adminRoutes);
 
-// Test route
+
 app.get('/', (req, res) => res.send('Finance Tracker API Running'));
 
-// ------------------ DATABASE SYNC ------------------ //
+
 sequelize
   .sync()
   .then(() => console.log('Database synced'))

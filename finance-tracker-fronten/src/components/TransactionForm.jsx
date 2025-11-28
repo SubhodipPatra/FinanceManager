@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from 'react';
 import '../styles/TransactionForm.css';
 
@@ -18,13 +16,7 @@ const TransactionForm = ({ isOpen, onClose, onSave, initialData }) => {
     } else {
       setFormData({ type: 'expense', amount: '', category: '', description: '' });
     }
-  }, [initialData]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      setFormData({ type: 'expense', amount: '', category: '', description: '' });
-    }
-  }, [isOpen]);
+  }, [initialData, isOpen]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -62,7 +54,7 @@ const TransactionForm = ({ isOpen, onClose, onSave, initialData }) => {
 
           <div className="form-group">
             <input 
-              type="text" placeholder="Category" className="form-input" required
+              type="text" placeholder="Category (e.g., Food, Rent)" className="form-input" required
               value={formData.category}
               onChange={(e) => setFormData({...formData, category: e.target.value})}
             />

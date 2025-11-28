@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const User = require('./User'); // <--- IMPORT USER
+const User = require('./User');
 
 const Transaction = sequelize.define('Transaction', {
     id: { 
@@ -33,8 +33,7 @@ const Transaction = sequelize.define('Transaction', {
     }
 }, { timestamps: true });
 
-// --- THE CRITICAL ASSOCIATION ---
-// This allows the controller to use "include: [User]"
+
 Transaction.belongsTo(User, { foreignKey: 'userId' });
 
 module.exports = Transaction;

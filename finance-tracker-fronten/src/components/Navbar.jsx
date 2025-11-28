@@ -15,7 +15,7 @@ const Navbar = () => {
 
   return (
     <nav className="navbar">
-    
+   
       <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
         <div className="nav-brand">FinanceManager</div>
         
@@ -27,7 +27,7 @@ const Navbar = () => {
             Transactions
           </Link>
           
-   
+
           {user?.role === 'admin' && (
             <Link 
               to="/admin" 

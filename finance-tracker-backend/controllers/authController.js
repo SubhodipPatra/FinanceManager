@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const { generateToken } = require('../utils/jwt');
 
-// Register
+
 const register = async (req, res) => {
   const { name, email, password, role } = req.body;
   try {
@@ -19,7 +19,7 @@ const register = async (req, res) => {
   }
 };
 
-// Login
+
 const login = async (req, res) => {
   const { email, password } = req.body;
   try {

@@ -2,7 +2,6 @@ import React, { useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import AutoSizer from "react-virtualized-auto-sizer";
 
-
 const ROW_HEIGHT = 60; 
 const GRID_LAYOUT = "110px 140px 100px 140px 1fr 120px 140px";
 
@@ -29,7 +28,7 @@ export default function VirtualTransactionList({ transactions, onEdit, onDelete,
       >
         <span>Date</span>
         <span>User</span> 
-        <span>Type</span>
+        <span>Type</span> 
         <span>Category</span>
         <span>Description</span>
         <span className="text-right">Amount</span>
@@ -148,7 +147,6 @@ function TransactionRow({ transaction, onEdit, onDelete, isReadOnly }) {
         </span>
       </div>
 
-
       <span className="text-sm text-gray-800 truncate pr-2">
         {category}
       </span>
@@ -162,6 +160,7 @@ function TransactionRow({ transaction, onEdit, onDelete, isReadOnly }) {
       <div className={`text-right font-bold text-sm ${type === "income" ? "text-green-600" : "text-red-600"}`}>
         {type === "income" ? "+" : "-"} ₹{amount}
       </div>
+
 
       <div className="flex justify-center gap-2">
         {!isReadOnly && (

@@ -1,12 +1,9 @@
-// controllers/transactionController.js
+
 const Transaction = require('../models/Transaction');
-const User = require('../models/User'); // <--- 1. Import the User model
+const User = require('../models/User'); 
 const { Op } = require('sequelize');
 
-/**
- * Add Transaction
- * - Roles allowed: user, admin
- */
+
 const addTransaction = async (req, res) => {
   try {
     if (req.user.role === 'read-only') {
@@ -30,11 +27,7 @@ const addTransaction = async (req, res) => {
   }
 };
 
-/**
- * View Transactions
- * - Admin sees all, users/read-only see their own
- * - Supports pagination, filtering by type/category
- */
+
 const viewTransactions = async (req, res) => {
   try {
     const { type, category, page = 1, limit = 10 } = req.query;
@@ -50,11 +43,11 @@ const viewTransactions = async (req, res) => {
       limit: parseInt(limit),
       offset: parseInt(offset),
       order: [['createdAt', 'DESC']],
-      // <--- 2. MAGIC HAPPENS HERE: Join with User table
+
       include: [
         {
           model: User,
-          attributes: ['name', 'email'], // Only fetch name/email (exclude password!)
+          attributes: ['name', 'email'], 
         }
       ]
     });
@@ -71,11 +64,7 @@ const viewTransactions = async (req, res) => {
   }
 };
 
-/**
- * Update Transaction
- * - Admin can update any transaction
- * - Users can update their own only
- */
+
 const updateTransaction = async (req, res) => {
   try {
     const { id } = req.params;
@@ -97,11 +86,7 @@ const updateTransaction = async (req, res) => {
   }
 };
 
-/**
- * Delete Transaction
- * - Admin can delete any transaction
- * - Users can delete their own only
- */
+
 const deleteTransaction = async (req, res) => {
   try {
     const { id } = req.params;
