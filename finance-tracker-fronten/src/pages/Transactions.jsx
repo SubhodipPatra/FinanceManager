@@ -5,10 +5,9 @@ import Navbar from '../components/Navbar';
 import TransactionForm from '../components/TransactionForm';
 import VirtualTransactionList from '../components/VirtualTransactionList';
 import '../styles/Transactions.css';
-
 const Transactions = () => {
   const { user, loading } = useAuth();
-  
+
   const [transactions, setTransactions] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -16,15 +15,10 @@ const Transactions = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-
   const isAdmin = user?.role === 'admin';
   const isReadOnly = user?.role === 'read-only';
 
-
   const fetchTransactions = useCallback(async () => {
-
-    if (!user) return;
-
     try {
       const { data } = await api.get(`/transactions?page=${page}&limit=10`);
       setTransactions(data.transactions);
@@ -32,70 +26,59 @@ const Transactions = () => {
     } catch (err) {
       console.error('Failed to fetch transactions', err);
     }
-  }, [page, user]);
-
+  }, [page]);
 
   useEffect(() => {
-    fetchTransactions();
-  }, [fetchTransactions]); 
-
+    if (user) fetchTransactions();
+  }, [user, fetchTransactions]);
 
 
   const filteredTransactions = useMemo(() => {
+    const term = searchTerm.toLowerCase();
     return transactions.filter(t => {
-      const matchDescription = t.description.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchCategory = t.category.toLowerCase().includes(searchTerm.toLowerCase());
- 
-      const matchUser = t.User?.name 
-        ? t.User.name.toLowerCase().includes(searchTerm.toLowerCase()) 
-        : false;
+      const desc = t.description?.toLowerCase() || "";
+      const cat = t.category?.toLowerCase() || "";
+      const usr = t.User?.name?.toLowerCase() || "";
 
-      return matchDescription || matchCategory || matchUser;
+      return desc.includes(term) || cat.includes(term) || usr.includes(term);
     });
   }, [transactions, searchTerm]);
-
 
 
   const handleDelete = useCallback(async (id) => {
     if (!window.confirm("Are you sure?")) return;
     try {
       await api.delete(`/transactions/${id}`);
-      setTransactions((prev) => prev.filter((t) => t.id !== id));
+      fetchTransactions(); // refresh list
     } catch (err) {
       alert("Failed to delete transaction");
     }
-  }, []);
-
+  }, [fetchTransactions]);
 
 
   const handleSave = async (formData) => {
     try {
-
       const payload = {
         ...formData,
         amount: parseFloat(formData.amount)
       };
 
       if (editingItem) {
-
         await api.put(`/transactions/${editingItem.id}`, payload);
-        fetchTransactions(); 
       } else {
-   
-        await api.post('/transactions', payload);
-        
-        if (page !== 1) {
-          setPage(1); 
-        } else {
-          fetchTransactions(); 
-        }
+        await api.post(`/transactions`, payload);
       }
 
-      setIsModalOpen(false);
+     
+      if (page !== 1) setPage(1);
+      else fetchTransactions();
+
       setEditingItem(null);
+      setIsModalOpen(false);
+
     } catch (err) {
       console.error("Save Error:", err);
-      alert("Failed to save transaction. Check console for details.");
+      alert("Failed to save transaction");
     }
   };
 
@@ -103,7 +86,6 @@ const Transactions = () => {
     setEditingItem(item);
     setIsModalOpen(true);
   };
-
 
   if (loading) {
     return (
@@ -117,13 +99,15 @@ const Transactions = () => {
   return (
     <>
       <Navbar />
-      
+
       <div className="transactions-container">
         
+
         <div className="page-header">
           <h2 className="text-2xl font-bold">
-            {isAdmin ? 'All User Transactions' : 'My Transaction History'}
+            {isAdmin ? "All User Transactions" : "My Transaction History"}
           </h2>
+
           {!isReadOnly && (
             <button onClick={() => openModal()} className="btn btn-primary">
               + Add Transaction
@@ -132,15 +116,20 @@ const Transactions = () => {
         </div>
 
         <div className="filter-bar">
-          <input 
-            type="text" 
-            placeholder={isAdmin ? "Search description, category, or user..." : "Search description or category..."}
+          <input
+            type="text"
+            placeholder={
+              isAdmin
+                ? "Search description, category, or user..."
+                : "Search description or category..."
+            }
             className="search-input"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
+        {/* List */}
         {filteredTransactions.length > 0 ? (
           <div style={{ height: '600px', width: '100%', border: '1px solid #e5e7eb', borderRadius: '8px' }}>
             <VirtualTransactionList
@@ -148,7 +137,7 @@ const Transactions = () => {
               onEdit={openModal}
               onDelete={handleDelete}
               isReadOnly={isReadOnly}
-              showUserColumn={isAdmin} 
+              showUserColumn={isAdmin}
             />
           </div>
         ) : (
@@ -157,18 +146,21 @@ const Transactions = () => {
           </div>
         )}
 
+        {/* Pagination */}
         <div className="pagination" style={{ marginTop: '1rem' }}>
-          <button 
-            disabled={page === 1} 
+          <button
+            disabled={page === 1}
             onClick={() => setPage(p => p - 1)}
-            className="btn" 
+            className="btn"
             style={{ padding: '0.5rem 1rem', background: '#e5e7eb' }}
           >
             Previous
           </button>
+
           <span>Page {page} of {totalPages}</span>
-          <button 
-            disabled={page === totalPages} 
+
+          <button
+            disabled={page === totalPages}
             onClick={() => setPage(p => p + 1)}
             className="btn"
             style={{ padding: '0.5rem 1rem', background: '#e5e7eb' }}
@@ -177,9 +169,9 @@ const Transactions = () => {
           </button>
         </div>
 
-        <TransactionForm 
-          isOpen={isModalOpen} 
-          onClose={() => setIsModalOpen(false)} 
+        <TransactionForm
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
           onSave={handleSave}
           initialData={editingItem}
         />
